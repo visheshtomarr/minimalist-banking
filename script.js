@@ -66,3 +66,27 @@ const currencies = new Map([
   ['EUR', 'Euro'],
   ['GBP', 'Pound sterling'],
 ]);
+
+// Function to display the movements on UI.
+const displayMovements = (movements) => {
+  // Empty the current 'movements' container.
+  containerMovements.innerHTML = '';
+
+  movements.forEach(function (movement, i) {
+    // Type of movement
+    const type = movement > 0 ? 'deposit' : 'withdrawal';
+
+    const html = `
+      <div class="movements__row">
+        <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
+        <div class="movements__value">${movement}</div>
+      </div>
+    `;
+
+    // We will be adding each new movement row element at the very beginning of
+    // the 'movements' container. 
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  })
+}
+
+displayMovements(account1.movements);
