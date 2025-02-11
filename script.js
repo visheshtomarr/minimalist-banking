@@ -67,8 +67,8 @@ const currencies = new Map([
   ['GBP', 'Pound sterling'],
 ]);
 
-// Function to display the movements on UI.
-const displayMovements = (movements) => {
+// Function to display the movements.
+const displayMovements = movements => {
   // Empty the current 'movements' container.
   containerMovements.innerHTML = '';
 
@@ -79,7 +79,7 @@ const displayMovements = (movements) => {
     const html = `
       <div class="movements__row">
         <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-        <div class="movements__value">${movement}</div>
+        <div class="movements__value">${movement}€</div>
       </div>
     `;
 
@@ -91,9 +91,52 @@ const displayMovements = (movements) => {
 
 displayMovements(account1.movements);
 
+// Calculate and display the balance of an account.
+const calcAndDisplayBalance = movements => {
+  // Calculate the total balance of an account.
+  const balance = movements.reduce((acc, movement) => acc + movement, 0);
+  
+  // Display in UI.
+  labelBalance.textContent = `${balance}€`;
+}
+
+calcAndDisplayBalance(account1.movements);
+
+// Calculate and display balance summary (in, out and interest).
+const calcAndDisplayBalanceSummary = movements => {
+    // Calculate total deposits.
+    const deposits = movements
+      .filter(movement => movement > 0)
+      .reduce((acc, deposit) => acc + deposit, 0);
+
+    // Display in UI.
+    labelSumIn.textContent = `${deposits}€`;
+
+    // Calculate total withdrawals.
+    const withdrawals = movements
+    .filter(movement => movement < 0)
+    .reduce((acc, withdrawal) => acc + withdrawal, 0);
+
+    // Display in UI.
+    labelSumOut.textContent = `${Math.abs(withdrawals)}€`;
+
+    // Calulate interest on deposits (only interests greater than 1 EUR).
+    // The interest rate on deposits is 1.2%.
+    const interest = movements
+    .filter(movement => movement > 0)
+    .map(deposit => deposit * 1.2 / 100)
+    .filter(interest => interest > 1)
+    .reduce((acc, interest) => acc + interest, 0);
+
+    // Display in UI.
+    labelSumInterest.textContent = `${interest}€`;
+}
+
+calcAndDisplayBalanceSummary(account1.movements);
+
 // Create usernames for our accounts.
-const creatUsernames = function (accounts) {
-  accounts.forEach((account) => {
+const creatUsernames = accounts => {
+  accounts.forEach(account => {
     account.username = account.owner
       .toLowerCase()
       .split(' ')
