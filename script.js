@@ -1,7 +1,7 @@
 'use strict';
 
 /////////////////////////////////////////////////
-// BANKIST APP
+// MINIMALIST BANKING APP
 
 // Data
 const account1 = {
@@ -12,14 +12,14 @@ const account1 = {
 };
 
 const account2 = {
-  owner: 'Harry Osborn',
+  owner: 'Peter Parker',
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
 };
 
 const account3 = {
-  owner: 'Peter Parker',
+  owner: 'Harry Osborn',
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
@@ -89,8 +89,6 @@ const displayMovements = movements => {
   })
 }
 
-displayMovements(account1.movements);
-
 // Calculate and display the balance of an account.
 const calcAndDisplayBalance = movements => {
   // Calculate the total balance of an account.
@@ -100,12 +98,10 @@ const calcAndDisplayBalance = movements => {
   labelBalance.textContent = `${balance}€`;
 }
 
-calcAndDisplayBalance(account1.movements);
-
 // Calculate and display balance summary (in, out and interest).
-const calcAndDisplayBalanceSummary = movements => {
+const calcAndDisplayBalanceSummary = account => {
     // Calculate total deposits.
-    const deposits = movements
+    const deposits = account.movements
       .filter(movement => movement > 0)
       .reduce((acc, deposit) => acc + deposit, 0);
 
@@ -113,7 +109,7 @@ const calcAndDisplayBalanceSummary = movements => {
     labelSumIn.textContent = `${deposits}€`;
 
     // Calculate total withdrawals.
-    const withdrawals = movements
+    const withdrawals = account.movements
     .filter(movement => movement < 0)
     .reduce((acc, withdrawal) => acc + withdrawal, 0);
 
@@ -121,18 +117,15 @@ const calcAndDisplayBalanceSummary = movements => {
     labelSumOut.textContent = `${Math.abs(withdrawals)}€`;
 
     // Calulate interest on deposits (only interests greater than 1 EUR).
-    // The interest rate on deposits is 1.2%.
-    const interest = movements
+    const interest = account.movements
     .filter(movement => movement > 0)
-    .map(deposit => deposit * 1.2 / 100)
+    .map(deposit => (deposit * account.interestRate) / 100)
     .filter(interest => interest > 1)
     .reduce((acc, interest) => acc + interest, 0);
 
     // Display in UI.
     labelSumInterest.textContent = `${interest}€`;
 }
-
-calcAndDisplayBalanceSummary(account1.movements);
 
 // Create usernames for our accounts.
 const creatUsernames = accounts => {
@@ -144,6 +137,48 @@ const creatUsernames = accounts => {
       .join('');
   });
 }
-
 creatUsernames(accounts);
-console.log(accounts);
+
+// Create a currently logged in account.
+let currentAccount;
+
+// Implement the login functionality
+btnLogin.addEventListener('click', (e) => {
+  // Prevent form from submitting
+  e.preventDefault();
+
+  // Finding the current account in the 'accounts' array.
+  currentAccount = accounts.find(account => account.username === inputLoginUsername.value);
+
+  // Check whether the pin is correct or not.
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // Display UI and welcome message
+    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`;
+    containerApp.style.opacity = 1;
+
+    // Clear input fields and make pin out of focus.
+    inputLoginUsername.value = '';
+    inputLoginPin.value = '';
+    inputLoginPin.blur();
+
+    // Display movements
+    displayMovements(currentAccount.movements);
+
+    // Display account's balance
+    calcAndDisplayBalance(currentAccount.movements);
+
+    // Display account summary
+    calcAndDisplayBalanceSummary(currentAccount);
+  }
+  
+  else if (currentAccount?.pin !== Number(inputLoginPin.value)) {
+    // Display Error message in UI and hide app container.
+    labelWelcome.textContent = 'Wrong Pin! Please try again!';
+    containerApp.style.opacity = 0;
+
+    // Clear input fields and make pin out of focus.
+    inputLoginUsername.value = '';
+    inputLoginPin.value = '';
+    inputLoginPin.blur();
+  }
+})
