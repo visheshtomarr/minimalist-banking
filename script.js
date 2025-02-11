@@ -90,3 +90,17 @@ const displayMovements = (movements) => {
 }
 
 displayMovements(account1.movements);
+
+// Create usernames for our accounts.
+const creatUsernames = function (accounts) {
+  accounts.forEach((account) => {
+    account.username = account.owner
+      .toLowerCase()
+      .split(' ')
+      .map(name => name.at(0))
+      .join('');
+  });
+}
+
+creatUsernames(accounts);
+console.log(accounts);
