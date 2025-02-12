@@ -68,11 +68,15 @@ const currencies = new Map([
 ]);
 
 // Function to display the movements.
-const displayMovements = movements => {
+const displayMovements = (movements, sort = false) => {
   // Empty the current 'movements' container.
   containerMovements.innerHTML = '';
 
-  movements.forEach(function (movement, i) {
+  // Sort the movements based on the 'sort' argument's current state.
+  // This will sort the movements in ascending order.
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach(function (movement, i) {
     // Type of movement
     const type = movement > 0 ? 'deposit' : 'withdrawal';
 
@@ -236,6 +240,17 @@ btnLoan.addEventListener('click', (e) => {
   }
   inputLoanAmount.value = '';
   inputLoanAmount.blur();
+})
+
+// Local state to check whether the movements are sorted or not.
+let sorted = false;
+
+// Implement the sort movements functionality.
+btnSort.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  displayMovements(currentAccount.movements, !sorted);
+  sorted = !sorted;
 })
 
 // Implement the close account functionality.
