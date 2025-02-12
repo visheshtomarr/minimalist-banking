@@ -90,12 +90,12 @@ const displayMovements = movements => {
 }
 
 // Calculate and display the balance of an account.
-const calcAndDisplayBalance = movements => {
+const calcAndDisplayBalance = account => {
   // Calculate the total balance of an account.
-  const balance = movements.reduce((acc, movement) => acc + movement, 0);
+  account.balance = account.movements.reduce((acc, movement) => acc + movement, 0);
   
   // Display in UI.
-  labelBalance.textContent = `${balance}€`;
+  labelBalance.textContent = `${account.balance}€`;
 }
 
 // Calculate and display balance summary (in, out and interest).
@@ -139,10 +139,22 @@ const creatUsernames = accounts => {
 }
 creatUsernames(accounts);
 
+// Function to update UI.
+const updateUI = account => {
+  // Display movements
+  displayMovements(account.movements);
+
+  // Display account's balance
+  calcAndDisplayBalance(account);
+
+  // Display account summary
+  calcAndDisplayBalanceSummary(account);
+}
+
 // Create a currently logged in account.
 let currentAccount;
 
-// Implement the login functionality
+// Implement the login functionality.
 btnLogin.addEventListener('click', (e) => {
   // Prevent form from submitting
   e.preventDefault();
@@ -161,14 +173,7 @@ btnLogin.addEventListener('click', (e) => {
     inputLoginPin.value = '';
     inputLoginPin.blur();
 
-    // Display movements
-    displayMovements(currentAccount.movements);
-
-    // Display account's balance
-    calcAndDisplayBalance(currentAccount.movements);
-
-    // Display account summary
-    calcAndDisplayBalanceSummary(currentAccount);
+    updateUI(currentAccount);
   }
   
   else if (currentAccount?.pin !== Number(inputLoginPin.value)) {
@@ -181,4 +186,32 @@ btnLogin.addEventListener('click', (e) => {
     inputLoginPin.value = '';
     inputLoginPin.blur();
   }
+})
+
+// Implement the transfer money functionality.
+btnTransfer.addEventListener('click', (e) => {
+  // To prevent page reload after form submission.
+  e.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+  const receiverAccount = accounts.find(acc => acc.username === inputTransferTo.value);
+  
+  // Check whether the receiver is a valid one, if the sender has enough balance 
+  // to transfer and also a user cannot transfer to themselves.
+  if (
+    amount > 0 &&
+    receiverAccount &&
+    currentAccount.balance >= amount &&
+    receiverAccount?.username !== currentAccount.username
+  ) {
+    receiverAccount.movements.push(amount);
+    currentAccount.movements.push(-amount);
+
+    updateUI(currentAccount);
+  }
+
+  // Clear input fields and make pin out of focus.
+  inputTransferAmount.value = '';
+  inputTransferTo.value = '';
+  inputTransferTo.blur();
 })
