@@ -216,6 +216,28 @@ btnTransfer.addEventListener('click', (e) => {
   inputTransferTo.blur();
 })
 
+// Implement the loan functionality.
+btnLoan.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  const amount = Number(inputLoanAmount.value);
+
+  // The loan will be granted only if any of the deposits is 
+  // greater than or equal to 10% of the amount requested.
+  if (
+    amount > 0 && 
+    currentAccount.movements.some(mov => mov >= amount * 0.1)
+  ) {
+    // Add the loan amount to movements.
+    currentAccount.movements.push(amount);
+    
+    // Update UI.
+    updateUI(currentAccount);
+  }
+  inputLoanAmount.value = '';
+  inputLoanAmount.blur();
+})
+
 // Implement the close account functionality.
 btnClose.addEventListener('click', (e) => {
   // To prevent page reload after form submission.
