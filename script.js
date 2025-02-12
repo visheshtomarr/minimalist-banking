@@ -215,3 +215,28 @@ btnTransfer.addEventListener('click', (e) => {
   inputTransferTo.value = '';
   inputTransferTo.blur();
 })
+
+// Implement the close account functionality.
+btnClose.addEventListener('click', (e) => {
+  // To prevent page reload after form submission.
+  e.preventDefault();
+
+  // Check if the logged in user is the one closing the account.
+  if (currentAccount.username === inputCloseUsername.value && 
+        currentAccount.pin === Number(inputClosePin.value)
+  ) {
+    const index = accounts.findIndex(account => 
+      account.username === currentAccount.username
+    );
+    // We will remove the user from the accounts array.
+    accounts.splice(index, 1);
+    // console.log(accounts);
+
+    // Update UI
+    inputCloseUsername.value = '';
+    inputClosePin.value = '';
+    inputClosePin.blur();
+    labelWelcome.textContent = 'Log in to get started';
+    containerApp.style.opacity = 0;
+  }
+})
