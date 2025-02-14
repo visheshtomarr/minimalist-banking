@@ -32,7 +32,49 @@ const account4 = {
   pin: 4444,
 };
 
-const accounts = [account1, account2, account3, account4];
+// Two new accounts with dates, currency and locale.
+const account5 = {
+  owner: 'Uncle Ben',
+  movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
+  interestRate: 1.2, // %
+  pin: 5555,
+
+  movementsDates: [
+    '2019-11-18T21:31:17.178Z',
+    '2019-12-23T07:42:02.383Z',
+    '2020-01-28T09:15:04.904Z',
+    '2020-04-01T10:17:24.185Z',
+    '2020-05-08T14:11:59.604Z',
+    '2020-05-27T17:01:17.194Z',
+    '2020-07-11T23:36:17.929Z',
+    '2020-07-12T10:51:36.790Z',
+  ],
+  currency: 'EUR',
+  locale: 'pt-PT', // de-DE
+};
+
+const account6 = {
+  owner: 'Aunt May',
+  movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
+  interestRate: 1.5,
+  pin: 6666,
+
+  movementsDates: [
+    '2019-11-01T13:15:33.035Z',
+    '2019-11-30T09:48:16.867Z',
+    '2019-12-25T06:04:23.907Z',
+    '2020-01-25T14:18:46.235Z',
+    '2020-02-05T16:33:06.386Z',
+    '2020-04-10T14:43:26.374Z',
+    '2020-06-25T18:49:59.371Z',
+    '2020-07-26T12:01:20.894Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US',
+};
+
+
+const accounts = [account1, account2, account3, account4, account5, account6];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -83,7 +125,7 @@ const displayMovements = (movements, sort = false) => {
     const html = `
       <div class="movements__row">
         <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-        <div class="movements__value">${movement}€</div>
+        <div class="movements__value">${movement.toFixed(2)}€</div>
       </div>
     `;
 
@@ -99,7 +141,7 @@ const calcAndDisplayBalance = account => {
   account.balance = account.movements.reduce((acc, movement) => acc + movement, 0);
   
   // Display in UI.
-  labelBalance.textContent = `${account.balance}€`;
+  labelBalance.textContent = `${account.balance.toFixed(2)}€`;
 }
 
 // Calculate and display balance summary (in, out and interest).
@@ -110,7 +152,7 @@ const calcAndDisplayBalanceSummary = account => {
       .reduce((acc, deposit) => acc + deposit, 0);
 
     // Display in UI.
-    labelSumIn.textContent = `${deposits}€`;
+    labelSumIn.textContent = `${deposits.toFixed(2)}€`;
 
     // Calculate total withdrawals.
     const withdrawals = account.movements
@@ -118,7 +160,7 @@ const calcAndDisplayBalanceSummary = account => {
     .reduce((acc, withdrawal) => acc + withdrawal, 0);
 
     // Display in UI.
-    labelSumOut.textContent = `${Math.abs(withdrawals)}€`;
+    labelSumOut.textContent = `${Math.abs(withdrawals).toFixed(2)}€`;
 
     // Calulate interest on deposits (only interests greater than 1 EUR).
     const interest = account.movements
@@ -128,7 +170,7 @@ const calcAndDisplayBalanceSummary = account => {
     .reduce((acc, interest) => acc + interest, 0);
 
     // Display in UI.
-    labelSumInterest.textContent = `${interest}€`;
+    labelSumInterest.textContent = `${interest.toFixed(2)}€`;
 }
 
 // Create usernames for our accounts.
@@ -224,7 +266,7 @@ btnTransfer.addEventListener('click', (e) => {
 btnLoan.addEventListener('click', (e) => {
   e.preventDefault();
 
-  const amount = Number(inputLoanAmount.value);
+  const amount = Math.floor(inputLoanAmount.value);
 
   // The loan will be granted only if any of the deposits is 
   // greater than or equal to 10% of the amount requested.
