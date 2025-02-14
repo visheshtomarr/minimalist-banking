@@ -110,28 +110,48 @@ const currencies = new Map([
 ]);
 
 // Function to display the movements.
-const displayMovements = (movements, sort = false) => {
+const displayMovements = (account, sort = false) => {
   // Empty the current 'movements' container.
   containerMovements.innerHTML = '';
 
   // Sort the movements based on the 'sort' argument's current state.
   // This will sort the movements in ascending order.
-  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  const movs = sort ? account.movements.slice().sort((a, b) => a - b) : account.movements;
 
   movs.forEach(function (movement, i) {
     // Type of movement
     const type = movement > 0 ? 'deposit' : 'withdrawal';
 
-    const html = `
-      <div class="movements__row">
-        <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-        <div class="movements__value">${movement.toFixed(2)}€</div>
-      </div>
-    `;
-
-    // We will be adding each new movement row element at the very beginning of
-    // the 'movements' container. 
-    containerMovements.insertAdjacentHTML('afterbegin', html);
+    if (account.movementsDates) {
+      const date = new Date(account.movementsDates[i] || '');
+      const day = `${date.getDate()}`.padStart(2, 0);
+      const month = `${date.getMonth() + 1}`.padStart(2, 0);
+      const year = date.getFullYear();
+      const displayDate = `${day}/${month}/${year}`;
+      
+      const html = `
+        <div class="movements__row">
+          <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
+          <div class="movements__date">${displayDate}</div>
+          <div class="movements__value">${movement.toFixed(2)}€</div>
+        </div>
+      `;
+      
+        // We will be adding each new movement row element at the very beginning of
+        // the 'movements' container. 
+        containerMovements.insertAdjacentHTML('afterbegin', html);
+    } else {
+      const html = `
+        <div class="movements__row">
+          <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
+          <div class="movements__value">${movement.toFixed(2)}€</div>
+        </div>
+      `;
+      
+        // We will be adding each new movement row element at the very beginning of
+        // the 'movements' container. 
+        containerMovements.insertAdjacentHTML('afterbegin', html);
+    }
   })
 }
 
@@ -188,7 +208,7 @@ creatUsernames(accounts);
 // Function to update UI.
 const updateUI = account => {
   // Display movements
-  displayMovements(account.movements);
+  displayMovements(account);
 
   // Display account's balance
   calcAndDisplayBalance(account);
@@ -213,6 +233,15 @@ btnLogin.addEventListener('click', (e) => {
     // Display UI and welcome message
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`;
     containerApp.style.opacity = 1;
+
+    // Create current date and time.
+    const now = new Date();
+    const day = `${now.getDate()}`.padStart(2, 0);
+    const month = `${now.getMonth() + 1}`.padStart(2, 0);
+    const year = now.getFullYear();
+    const hour = `${now.getHours()}`.padStart(2, 0);
+    const minutes = `${now.getMinutes()}`.padStart(2, 0);
+    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minutes}`;
 
     // Clear input fields and make pin out of focus.
     inputLoginUsername.value = '';
@@ -250,9 +279,15 @@ btnTransfer.addEventListener('click', (e) => {
     currentAccount.balance >= amount &&
     receiverAccount?.username !== currentAccount.username
   ) {
+    // Performing transfer.
     receiverAccount.movements.push(amount);
     currentAccount.movements.push(-amount);
 
+    // Add new transfer date.
+    currentAccount.movementsDates?.push(new Date().toISOString());
+    receiverAccount.movementsDates?.push(new Date().toISOString());
+    
+    // Update UI
     updateUI(currentAccount);
   }
 
@@ -276,6 +311,9 @@ btnLoan.addEventListener('click', (e) => {
   ) {
     // Add the loan amount to movements.
     currentAccount.movements.push(amount);
+
+    // Add loan date.
+    currentAccount.movementsDates?.push(new Date().toISOString());
     
     // Update UI.
     updateUI(currentAccount);
@@ -291,7 +329,7 @@ let sorted = false;
 btnSort.addEventListener('click', (e) => {
   e.preventDefault();
 
-  displayMovements(currentAccount.movements, !sorted);
+  displayMovements(currentAccount, !sorted);
   sorted = !sorted;
 })
 
