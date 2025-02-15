@@ -9,6 +9,8 @@ const account1 = {
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   interestRate: 1.2, // %
   pin: 1111,
+  currency: 'USD',
+  locale: 'en-US',
 };
 
 const account2 = {
@@ -16,6 +18,8 @@ const account2 = {
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
+  currency: 'USD',
+  locale: 'en-US',
 };
 
 const account3 = {
@@ -23,6 +27,8 @@ const account3 = {
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
+  currency: 'USD',
+  locale: 'en-US',
 };
 
 const account4 = {
@@ -30,6 +36,8 @@ const account4 = {
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
   pin: 4444,
+  currency: 'USD',
+  locale: 'en-US',
 };
 
 // Two new accounts with dates, currency and locale.
@@ -123,6 +131,15 @@ const formatMovementDate = (date, locale) => {
   return new Intl.DateTimeFormat(locale).format(date);
 }
 
+// Create the currency system based on the locale and currency
+// provided as input.
+const formatCurrency = (value, locale, currency) => {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency,
+  }).format(value);
+}
+
 // Function to display the movements.
 const displayMovements = (account, sort = false) => {
   // Empty the current 'movements' container.
@@ -135,16 +152,17 @@ const displayMovements = (account, sort = false) => {
   movs.forEach(function (movement, i) {
     // Type of movement
     const type = movement > 0 ? 'deposit' : 'withdrawal';
+    const formattedMovement = formatCurrency(movement, account.locale, account.currency);
 
     if (account.movementsDates) {
       const date = new Date(account.movementsDates[i]);
-      const displayDate = formatMovementDate(date, account?.locale);
+      const displayDate = formatMovementDate(date, account.locale);
       
       const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
           <div class="movements__date">${displayDate}</div>
-          <div class="movements__value">${movement.toFixed(2)}€</div>
+          <div class="movements__value">${formattedMovement}</div>
         </div>
       `;
       
@@ -155,7 +173,7 @@ const displayMovements = (account, sort = false) => {
       const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-          <div class="movements__value">${movement.toFixed(2)}€</div>
+          <div class="movements__value">${formattedMovement}</div>
         </div>
       `;
       
@@ -172,7 +190,7 @@ const calcAndDisplayBalance = account => {
   account.balance = account.movements.reduce((acc, movement) => acc + movement, 0);
   
   // Display in UI.
-  labelBalance.textContent = `${account.balance.toFixed(2)}€`;
+  labelBalance.textContent = formatCurrency(account.balance, account.locale, account.currency);
 }
 
 // Calculate and display balance summary (in, out and interest).
@@ -183,7 +201,7 @@ const calcAndDisplayBalanceSummary = account => {
       .reduce((acc, deposit) => acc + deposit, 0);
 
     // Display in UI.
-    labelSumIn.textContent = `${deposits.toFixed(2)}€`;
+    labelSumIn.textContent = formatCurrency(deposits, account.locale, account.currency);
 
     // Calculate total withdrawals.
     const withdrawals = account.movements
@@ -191,7 +209,7 @@ const calcAndDisplayBalanceSummary = account => {
     .reduce((acc, withdrawal) => acc + withdrawal, 0);
 
     // Display in UI.
-    labelSumOut.textContent = `${Math.abs(withdrawals).toFixed(2)}€`;
+    labelSumOut.textContent = formatCurrency(Math.abs(withdrawals), account.locale, account.currency);
 
     // Calulate interest on deposits (only interests greater than 1 EUR).
     const interest = account.movements
@@ -201,7 +219,7 @@ const calcAndDisplayBalanceSummary = account => {
     .reduce((acc, interest) => acc + interest, 0);
 
     // Display in UI.
-    labelSumInterest.textContent = `${interest.toFixed(2)}€`;
+    labelSumInterest.textContent = formatCurrency(interest, account.locale, account.currency);
 }
 
 // Create usernames for our accounts.
@@ -255,7 +273,7 @@ btnLogin.addEventListener('click', (e) => {
       minute: '2-digit'
     };
     labelDate.textContent = new Intl
-      .DateTimeFormat(currentAccount?.locale, options)
+      .DateTimeFormat(currentAccount.locale, options)
       .format(now);
 
     // Clear input fields and make pin out of focus.
