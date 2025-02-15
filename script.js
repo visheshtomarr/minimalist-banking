@@ -145,17 +145,31 @@ const displayMovements = (account, sort = false) => {
   // Empty the current 'movements' container.
   containerMovements.innerHTML = '';
 
+  // We will create a combined array of movements and movement dates (if available).
+  const combinedMovementsDates = account.movements.map((mov, i) => {
+    if (account.movementsDates) {
+        return {
+        movement: mov,
+        movementDate: account.movementsDates.at(i),
+      }
+    }
+    else {
+      return { movement: mov };
+    }
+  });
+
   // Sort the movements based on the 'sort' argument's current state.
   // This will sort the movements in ascending order.
-  const movs = sort ? account.movements.slice().sort((a, b) => a - b) : account.movements;
+  if (sort) combinedMovementsDates.sort((a, b) => a.movement - b.movement);
 
-  movs.forEach(function (movement, i) {
+  combinedMovementsDates.forEach(function (obj, i) {
+    const { movement, movementDate } = obj;
     // Type of movement
     const type = movement > 0 ? 'deposit' : 'withdrawal';
     const formattedMovement = formatCurrency(movement, account.locale, account.currency);
 
     if (account.movementsDates) {
-      const date = new Date(account.movementsDates[i]);
+      const date = new Date(movementDate);
       const displayDate = formatMovementDate(date, account.locale);
       
       const html = `
