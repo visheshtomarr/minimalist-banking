@@ -160,14 +160,16 @@ const startLogoutTimer = () => {
     time--;
   };
   
-  // Set time to 10 minutes (600 seconds).
-  let time = 600;
+  // Set time to 5 minutes (300 seconds).
+  let time = 300;
 
   // Call the timer in the beginning as well
   logoutTimer();
 
   // Then call the timer after every second.
   let timer = setInterval(logoutTimer, 1000);
+
+  return timer;
 }
 
 // Function to display the movements.
@@ -290,8 +292,8 @@ const updateUI = account => {
   calcAndDisplayBalanceSummary(account);
 }
 
-// Create a currently logged in account.
-let currentAccount;
+// Create a currently logged in account and global state of timer.
+let currentAccount, timer;
 
 // Implement the login functionality.
 btnLogin.addEventListener('click', (e) => {
@@ -325,7 +327,9 @@ btnLogin.addEventListener('click', (e) => {
     inputLoginPin.value = '';
     inputLoginPin.blur();
 
-    startLogoutTimer();
+    // If timer state is true, we reset timer.
+    if (timer) clearInterval(timer);
+    timer = startLogoutTimer();
 
     updateUI(currentAccount);
   }
@@ -368,6 +372,10 @@ btnTransfer.addEventListener('click', (e) => {
     
     // Update UI
     updateUI(currentAccount);
+
+    // Reset timer if user do a transfer.
+    clearInterval(timer);
+    timer = startLogoutTimer();
   }
 
   // Clear input fields and make pin out of focus.
@@ -398,6 +406,10 @@ btnLoan.addEventListener('click', (e) => {
       
       // Update UI.
       updateUI(currentAccount);
+
+      // Reset timer if user takes a loan.
+      clearInterval(timer);
+      timer = startLogoutTimer();
     }, 3000);
   }
   inputLoanAmount.value = '';
