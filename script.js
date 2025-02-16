@@ -140,6 +140,36 @@ const formatCurrency = (value, locale, currency) => {
   }).format(value);
 }
 
+// Function to create a logout timer.
+const startLogoutTimer = () => {
+  const logoutTimer = () => {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(Math.trunc(time % 60)).padStart(2, 0);
+
+    // In each call, print the remaining time to UI
+    labelTimer.textContent = `${min}:${sec}`;
+
+    // When time becomes 0, we logout
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Login to get started';
+      containerApp.style.opacity = 0;
+    }
+
+    // Decrease time by one second
+    time--;
+  };
+  
+  // Set time to 10 minutes (600 seconds).
+  let time = 600;
+
+  // Call the timer in the beginning as well
+  logoutTimer();
+
+  // Then call the timer after every second.
+  let timer = setInterval(logoutTimer, 1000);
+}
+
 // Function to display the movements.
 const displayMovements = (account, sort = false) => {
   // Empty the current 'movements' container.
@@ -295,6 +325,8 @@ btnLogin.addEventListener('click', (e) => {
     inputLoginPin.value = '';
     inputLoginPin.blur();
 
+    startLogoutTimer();
+
     updateUI(currentAccount);
   }
   
@@ -356,14 +388,17 @@ btnLoan.addEventListener('click', (e) => {
     amount > 0 && 
     currentAccount.movements.some(mov => mov >= amount * 0.1)
   ) {
-    // Add the loan amount to movements.
-    currentAccount.movements.push(amount);
+    // Bank will take 3 seconds to process the loan amount.
+    setTimeout(() => {
+      // Add the loan amount to movements.
+      currentAccount.movements.push(amount);
 
-    // Add loan date.
-    currentAccount.movementsDates?.push(new Date().toISOString());
-    
-    // Update UI.
-    updateUI(currentAccount);
+      // Add loan date.
+      currentAccount.movementsDates?.push(new Date().toISOString());
+      
+      // Update UI.
+      updateUI(currentAccount);
+    }, 3000);
   }
   inputLoanAmount.value = '';
   inputLoanAmount.blur();
